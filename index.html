@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Almanaque de Prefeitos - Jamildo</title>
+    <style>
+        :root {
+            --orange: #f83d03;
+            --blue: #024796;
+            --light-bg: #f4f4f9;
+            --white: #ffffff;
+            --text-dark: #333333;
+            --gray: #666666;
+            
+            /* Cores de Região Suaves */
+            --bg-rmr: #e3f2fd;
+            --border-rmr: #2196f3;
+            --bg-sertao: #fff3e0;
+            --border-sertao: #ff9800;
+            --bg-agreste: #f1f8e9;
+            --border-agreste: #8bc34a;
+            --bg-matanorte: #f3e5f5;
+            --border-matanorte: #9c27b0;
+            --bg-matasul: #fffde7;
+            --border-matasul: #fbc02d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            max-width: 200px;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            color: var(--blue);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .search-container {
+            padding: 1rem;
+            background-color: var(--blue);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        select {
+            padding: 0.6rem;
+            border-radius: 8px;
+            border: none;
+            background: var(--white);
+            font-size: 0.85rem;
+            color: var(--blue);
+            font-weight: bold;
+        }
+
+        .stats-summary {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            background: #e1e8f0;
+            color: var(--blue);
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            border-left: 6px solid #ccc;
+            transition: transform 0.2s ease;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        /* Estilos por Região */
+        .region-rmr { background-color: var(--bg-rmr); border-left-color: var(--border-rmr); }
+        .region-sertao { background-color: var(--bg-sertao); border-left-color: var(--border-sertao); }
+        .region-agreste { background-color: var(--bg-agreste); border-left-color: var(--border-agreste); }
+        .region-matanorte { background-color: var(--bg-matanorte); border-left-color: var(--border-matanorte); }
+        .region-matasul { background-color: var(--bg-matasul); border-left-color: var(--border-matasul); }
+
+        .card-header {
+            display: flex;
+            padding: 1rem;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .mayor-photo {
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+
+        .mayor-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .popular-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--orange);
+            line-height: 1.1;
+            margin-bottom: 2px;
+        }
+
+        .full-name-header {
+            font-size: 0.75rem;
+            color: #555;
+            font-style: italic;
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .city-name {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--blue);
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .card-body {
+            padding: 0 1rem 1rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .badge-party {
+            display: inline-block;
+            background-color: var(--blue);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            align-self: flex-start;
+        }
+
+        .info-container {
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+        }
+
+        .label {
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+
+        .value {
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .support-tag {
+            margin-top: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+        
+        .tag-raquel { background: #bbdefb; color: #0d47a1; }
+        .tag-joao { background: #ffe0b2; color: #e65100; }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+
+        #no-results {
+            text-align: center;
+            padding: 3rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="https://jamildo.com/media/uploads/logojamildo.png" alt="Blog do Jamildo" class="logo">
+    <h1>Almanaque de Prefeitos 2025</h1>
+</header>
+
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="Filtrar por cidade ou prefeito...">
+    <div class="filters">
+        <select id="regionFilter">
+            <option value="">Todas as Regiões</option>
+            <option value="RMR">RMR</option>
+            <option value="Agreste">Agreste</option>
+            <option value="Sertão">Sertão</option>
+            <option value="Zona da Mata Norte">Mata Norte</option>
+            <option value="Zona da Mata Sul">Mata Sul</option>
+        </select>
+        <select id="partyFilter">
+            <option value="">Todos os Partidos</option>
+        </select>
+    </div>
+</div>
+
+<div class="stats-summary" id="statsSummary">
+    Localizando prefeitos...
+</div>
+
+<div class="grid" id="mayorGrid"></div>
+
+<div id="no-results">
+    <p>Nenhum prefeito ou cidade corresponde aos filtros.</p>
+</div>
+
+<footer>
+    <p>&copy; 2025 Blog do Jamildo. Dados atualizados de Pernambuco.</p>
+</footer>
+
+<script>
+    const regionMap = {
+        "abreu_e_lima": "RMR", "afogados_da_ingazeira": "Sertão", "afranio": "Sertão", "agrestina": "Agreste", 
+        "agua_preta": "Zona da Mata Sul", "aguas_belas": "Agreste", "alagoinha": "Agreste", "alianca": "Zona da Mata Norte",
+        "altinho": "Agreste", "amaraji": "Zona da Mata Sul", "angelim": "Agreste", "aracoiaba": "RMR",
+        "araripina": "Sertão", "arco_verde": "Sertão", "barra_de_guabiraba": "Agreste", "barreiros": "Zona da Mata Sul",
+        "belem_de_maria": "Zona da Mata Sul", "belem_do_sao_francisco": "Sertão", "belo_jardim": "Agreste", "betania": "Sertão",
+        "bezerros": "Agreste", "bodoco": "Sertão", "bom_conselho": "Agreste", "bom_jardim": "Agreste", "bonito": "Agreste",
+        "brejao": "Agreste", "brejinho": "Sertão", "brejo_da_madre_de_deus": "Agreste", "buenos_aires": "Zona da Mata Norte",
+        "buique": "Agreste", "cabo_de_santo_agostinho": "RMR", "cabrobo": "Sertão", "cachoeirinha": "Agreste",
+        "caetes": "Agreste", "calcado": "Agreste", "calumbi": "Sertão", "camaragibe": "RMR", "camocim_de_sao_felix": "Agreste",
+        "camutanga": "Zona da Mata Norte", "canhotinho": "Agreste", "capoeiras": "Agreste", "carnaiba": "Sertão",
+        "carnaubeira_da_penha": "Sertão", "carpina": "Zona da Mata Norte", "caruaru": "Agreste", "casinhas": "Agreste",
+        "catende": "Zona da Mata Sul", "cedro": "Sertão", "cha_de_alegria": "Zona da Mata Norte", "cha_grande": "Agreste",
+        "condado": "Zona da Mata Norte", "correntes": "Agreste", "cortes": "Zona da Mata Sul", "cumaru": "Agreste",
+        "cupira": "Agreste", "custodia": "Sertão", "dormentes": "Sertão", "escada": "Zona da Mata Sul", "exu": "Sertão",
+        "feira_nova": "Agreste", "ferreiros": "Zona da Mata Norte", "flores": "Sertão", "floresta": "Sertão",
+        "frei_miguelino": "Agreste", "gameleira": "Zona da Mata Sul", "garanhuns": "Agreste", "gloria_do_goita": "Zona da Mata Norte",
+        "goiana": "Zona da Mata Norte", "granito": "Sertão", "gravata": "Agreste", "iati": "Agreste", "ibimirim": "Sertão",
+        "ibirajuba": "Agreste", "igarassu": "RMR", "iguaracy": "Sertão", "ilha_de_itamaraca": "RMR", "inaja": "Sertão",
+        "ingazeira": "Sertão", "ipojuca": "RMR", "ipubi": "Sertão", "itacuruba": "Sertão", "itaiba": "Agreste",
+        "itambe": "Zona da Mata Norte", "itapetim": "Sertão", "itapissuma": "RMR", "itaquitinga": "Zona da Mata Norte",
+        "jaboatao_dos_guararapes": "RMR", "jaqueira": "Zona da Mata Sul", "jatauba": "Agreste", "jatoba": "Sertão",
+        "joao_alfredo": "Agreste", "joaquim_nabuco": "Zona da Mata Sul", "jucati": "Agreste", "jupi": "Agreste",
+        "jurema": "Agreste", "lagoa_de_itaenga": "Zona da Mata Norte", "lagoa_do_carro": "Zona da Mata Norte",
+        "lagoa_do_ouro": "Agreste", "lagoa_dos_gatos": "Agreste", "lagoa_grande": "Sertão", "lajedo": "Agreste",
+        "limoeiro": "Agreste", "macaparana": "Zona da Mata Norte", "machados": "Agreste", "manari": "Sertão",
+        "maraial": "Zona da Mata Sul", "mirandiba": "Sertão", "moreilandia": "Sertão", "moreno": "RMR",
+        "nazare_da_mata": "Zona da Mata Norte", "olinda": "RMR", "orobo": "Agreste", "oroco": "Sertão",
+        "ouricuri": "Sertão", "palmares": "Zona da Mata Sul", "palmeirina": "Agreste", "panelas": "Agreste",
+        "paranatama": "Agreste", "parnamirim": "Sertão", "passira": "Agreste", "paudalho": "Zona da Mata Norte",
+        "paulista": "RMR", "pedra": "Agreste", "pesqueira": "Agreste", "petrolandia": "Sertão", "petrolina": "Sertão",
+        "pocao": "Agreste", "pombos": "Agreste", "primavera": "Zona da Mata Sul", "quipapa": "Zona da Mata Sul",
+        "quixaba": "Sertão", "recife": "RMR", "riacho_das_almas": "Agreste", "ribeirao": "Zona da Mata Sul",
+        "rio_formoso": "Zona da Mata Sul", "saire": "Agreste", "salgadinho": "Agreste", "salgueiro": "Sertão",
+        "saloa": "Agreste", "sanharo": "Agreste", "santa_cruz": "Sertão", "santa_cruz_da_baixa_verde": "Sertão",
+        "santa_cruz_do_capibaribe": "Agreste", "santa_filomena": "Sertão", "santa_maria_da_boa_vista": "Sertão",
+        "santa_maria_do_cambuca": "Agreste", "santa_terezinha": "Sertão", "sao_benedito_do_sul": "Zona da Mata Sul",
+        "sao_bento_do_una": "Agreste", "sao_caitano": "Agreste", "sao_joao": "Agreste", "sao_joaquim_do_monte": "Agreste",
+        "sao_jose_da_coroa_grande": "Zona da Mata Sul", "sao_jose_do_belmonte": "Sertão", "sao_jose_do_egito": "Sertão",
+        "sao_lourenco_da_mata": "RMR", "sao_vicente_ferrer": "Zona da Mata Norte", "serra_talhada": "Sertão",
+        "serrita": "Sertão", "sertania": "Sertão", "sirinhaem": "Zona da Mata Sul", "solidao": "Sertão", "surubim": "Agreste",
+        "tabira": "Sertão", "tacaimbo": "Agreste", "tacaratu": "Sertão", "tamandare": "Zona da Mata Sul",
+        "taquaritinga_do_norte": "Agreste", "terezinha": "Agreste", "terra_nova": "Sertão", "timbauba": "Zona da Mata Norte",
+        "toritama": "Agreste", "tracunhaem": "Zona da Mata Norte", "trindade": "Sertão", "triunfo": "Sertão",
+        "tupanatinga": "Agreste", "tuparetama": "Sertão", "venturosa": "Agreste", "verdejante": "Sertão",
+        "vertente_do_lerio": "Agreste", "vertentes": "Agreste", "vicencia": "Zona da Mata Norte",
+        "vitoria_de_santo_antao": "Zona da Mata Sul", "xexeu": "Zona da Mata Sul"
+    };
+
+    const rawData = [
+        ["abreu_e_lima", "Abreu e Lima", "Flávio Gadelha", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/flavio_gadelha_abreu_e_lima.jpg", "João Campos", "104.248", "FLAVIO VIEIRA GADELHA DE ALBUQUERQUE"],
+        ["afogados_da_ingazeira", "Afogados da Ingazeira", "Sandrinho Palmeira", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/sandrinho_palmeira_afogados_da_ingazeira.jpg", "João Campos", "42.672", "ALESANDRO PALMEIRA DE VASCONCELOS LEITE"],
+        ["afranio", "Afrânio", "Cloves Ramos", "MDB", "https://jamildo.com/media/uploads/2025/prefeitos/cloves_ramos_afranio.jpeg", "Raquel Lyra", "19.409", "CLOVES RAMOS DE MACEDO"],
+        ["agrestina", "Agrestina", "Josué Mendes", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/josue_mendes_agrestina.jpeg", "João Campos", "24.680", "JOSUE MENDES DA SILVA"],
+        ["agua_preta", "Água Preta", "Miruca", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/miruca_agua_preta.jpeg", "", "26.981", "ANTONIO MANOEL DA SILVA"],
+        ["aguas_belas", "Águas Belas", "Dr. Elton Martins", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/elton_martins_aguas_belas.jpeg", "", "43.822", "JOSÉ ELTON MARTINS DE SOUZA"],
+        ["alagoinha", "Alagoinha", "Simãozinho", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/simaozinho_alagoinha.jpg", "Raquel Lyra", "14.460", "SIMAO CIRINEU DA COSTA NETO"],
+        ["alianca", "Aliança", "Pedro Freitas", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/pedro_freitas_alianca.jpeg", "Raquel Lyra", "37.349", "PEDRO ERMIRIO DE ALMEIDA FREITAS FILHO"],
+        ["altinho", "Altinho", "Marivaldo Pena", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/marivaldo_pena_altinho.jpeg", "João Campos", "21.134", "MARIVALDO PENA"],
+        ["amaraji", "Amaraji", "Araujo", "Avante", "https://jamildo.com/media/uploads/2025/prefeitos/araujo_amaragi.jpeg", "", "18.335", "FLAUCIO DE ARAÚJO GUIMARÃES"],
+        ["angelim", "Angelim", "Caique o Galeguinho", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/caique_o_galeginho_angelim.jpg", "João Campos", "10.591", "CARLOS HENRIQUE FIGUEIREDO LOPES LIMA"],
+        ["aracoiaba", "Araçoiaba", "Jogli Uchôa", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/jogli_uchoa_aracoiaba.jpg", "Raquel Lyra", "19.996", "CARLOS JOGLI ALBUQUERQUE TAVARES UCHÔA"],
+        ["araripina", "Araripina", "Evilásio Mateus", "PDT", "https://jamildo.com/media/uploads/2025/prefeitos/evilasio_mateus_araripina.jpg", "João Campos", "90.504", "EVILÁSIO MATEUS DA SILVA CARDOSO"],
+        ["arco_verde", "Arcoverde", "Zeca Cavalcanti", "PODE", "https://jamildo.com/media/uploads/2025/prefeitos/zeca_cavalcanti_arcoverde1.jpg", "Raquel Lyra", "82.487", "JOSÉ CAVALCANTI ALVES JÚNIOR"],
+        ["barra_de_guabiraba", "Barra da Guabiraba", "Diogo", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/diogo_barra_da_guabiraba.jpg", "Raquel Lyra", "12.601", "DIOGO CARLOS DE LIMA SILVA"],
+        ["barreiros", "Barreiros", "Carlinhos da Pedreira", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/carlinhos_da_pedreira_barreiros.jpg", "", "42.083", "CARLOS ARTUR SOARES DE AVELLAR JUNIOR"],
+        ["belem_de_maria", "Belém de Maria", "Beto do Sargento", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/beto_do_sargento_belem_de_maria.jpg", "Raquel Lyra", "10.798", "ROBERTO PAULO DO NASCIMENTO SILVA"],
+        ["belem_do_sao_francisco", "Belém do São Francisco", "Calby Cavalcanti", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/calby_cavalcanti_belem_do_sao_francisco.jpg", "Raquel Lyra", "18.648", "CALBY DE CARVALHO CRUZ"],
+        ["belo_jardim", "Belo Jardim", "Gilvandro Estrela", "União", "https://jamildo.com/media/uploads/2025/prefeitos/gilvando_estrela_belo_jardim.jpg", "Raquel Lyra", "84.033", "GILVANDRO ESTRELA DE OLIVEIRA"],
+        ["betania", "Betânia", "Bebe Água", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/bebe_agua_betania.jpeg", "João Campos", "11.961", "ERIVALDO SEVERINO BEZERRA"],
+        ["bezerros", "Bezerros", "Lucielle Laurentino", "União", "https://jamildo.com/media/uploads/2025/prefeitos/lucielle_laurentino_bezerros.jpg", "Raquel Lyra", "65.007", "MARIA LUCIELLE SILVA LAURENTINO"],
+        ["bodoco", "Bodocó", "Dr Otávio", "MDB", "https://jamildo.com/media/uploads/2025/prefeitos/dr_otavio_bodoco.jpeg", "Raquel Lyra", "36.145", "OTÁVIO AUGUSTO TAVARES PEDROSA CAVALCANTE"],
+        ["bom_conselho", "Bom Conselho", "Dr Edézio", "PV", "https://jamildo.com/media/uploads/2025/prefeitos/dr_edezio_bom_conselho.png", "Raquel Lyra", "46.202", "EDEZIO FERREIRA DOS SANTOS FILHO"],
+        ["bom_jardim", "Bom Jardim", "Janjão", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/janjao_bom_jardim.jpeg", "Raquel Lyra", "39.289", "JOAO FRANCISCO DA SILVA NETO"],
+        ["bonito", "Bonito", "Dr Ruy", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/dr_ruy_bonito.jpg", "João Campos", "39.212", "RUY BARBOSA"],
+        ["brejao", "Brejão", "Saulo Maruim", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/saulo_maruim_brejao.jpg", "Raquel Lyra", "9.417", "SAULO HENRIQUE FLORENTINO DE BARROS"],
+        ["brejinho", "Brejinho", "Gilson Bento", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/gilson_bento_brejinho.jpg", "Raquel Lyra", "8.033", "GILSOMAR BENTO DA COSTA"],
+        ["brejo_da_madre_de_deus", "Brejo da Madre de Deus", "Roberto Asfora", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/roberto_asfora_brejo_da_madre_de_deus.jpeg", "Raquel Lyra", "51.308", "ROBERTO ABRAHAM ABRAHAMIAN ASFORA"],
+        ["buenos_aires", "Buenos Aires", "Henrique Queiroz", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/henrique_queiroz_buenos_aires.jpg", "Raquel Lyra", "13.276", "HENRIQUE JOSE QUEIROZ COSTA"],
+        ["buique", "Buíque", "Túlio Monteiro", "MDB", "https://jamildo.com/media/uploads/2025/prefeitos/tulio_monteiro_buique.jpg", "Raquel Lyra", "53.489", "TÚLIO HENRIQUE ARAÚJO CAVALCANTI"],
+        ["cabo_de_santo_agostinho", "Cabo de Santo Agostinho", "Lula Cabral", "Solidariedade", "https://jamildo.com/media/uploads/2025/prefeitos/lula_cabral_cabo_de_santo_agostinho.jpg", "João Campos", "218.049", "LUIZ CABRAL DE OLIVEIRA FILHO"],
+        ["cabrobo", "Cabrobó", "Galego do Nanai", "Avante", "https://jamildo.com/media/uploads/2025/prefeitos/galego_do_nanai_cabrobo.jpg", "", "31.762", "ELIOENAI DIAS SANTOS FILHO"],
+        ["cachoeirinha", "Cachoeirinha", "André Raimundo", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/andre_raimundo_cachoerinha.png", "Raquel Lyra", "20.673", "ANDRÉ PEDRO VALENÇA DE MELO RAIMUNDO"],
+        ["caetes", "Caetés", "Tirri", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/tirri_caetes.jpg", "João Campos", "30.571", "NIVALDO DA SILVA MARTINS"],
+        ["calcado", "Calçado", "Zé Elias Filho", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/ze_elias_filho_calcado.jpeg", "Raquel Lyra", "11.453", "JOSÉ ELIAS MACENA DE LIMA FILHO"],
+        ["calumbi", "Calumbi", "Joelson", "Avante", "https://jamildo.com/media/uploads/2025/prefeitos/joelson_calumbi.jpg", "Raquel Lyra", "5.354", "ERIVALDO JOSE DA SILVA"],
+        ["camaragibe", "Camaragibe", "Diego Cabral", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/diego_cabral_camaragibe.jpg", "Raquel Lyra", "156.112", "DIEGO DA ROCHA CABRAL"],
+        ["camocim_de_sao_felix", "Camocim de São Félix", "Sostenes", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/sostenes_camocim_de_sao_felix.jpeg", "Raquel Lyra", "18.018", "SOSTENES RUBANO NEVES PONTES"],
+        ["camutanga", "Camutanga", "Talita de Doda", "PV", "https://jamildo.com/media/uploads/2025/prefeitos/talita_de_doda_camutanga.jpg", "", "7.962", "TALITA CARDOZO FONSECA"],
+        ["canhotinho", "Canhotinho", "Sandra Paes", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/sandra-paes-canhotinho.jpg", "João Campos", "25.103", "SANDRA REJANE LOPES DE BARROS"],
+        ["capoeiras", "Capoeiras", "Nego do Mercado", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/negodomercado-capoeiras.jpg", "Raquel Lyra", "18.854", "JOAQUIM COSTA TEIXEIRA"],
+        ["carnaiba", "Carnaíba", "Berg Gomes", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/berg-gomes-carnaiba.jpg", "João Campos", "19.533", "WAMBERG ANTONIO GOMES AMARAL"],
+        ["carnaubeira_da_penha", "Carnaubeira da Penha", "Elizinho", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/elizinho_carnaubeira_da_penha.jpg", "Raquel Lyra", "12.712", "ELIZIO SOARES FILHO"],
+        ["carpina", "Carpina", "Eduarda Gouveia", "PODE", "https://jamildo.com/media/uploads/2025/prefeitos/eduarda_gouveia_carpina.jpg", "Raquel Lyra", "83.482", "MARIA EDUARDA BAIMA TEIXEIRA GOUVEIA"],
+        ["caruaru", "Caruaru", "Rodrigo Pinheiro", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/rodrigo_pinheiro_caruaru.jpg", "Raquel Lyra", "405.408", "RODRIGO ANSELMO PINHEIRO DOS SANTOS"],
+        ["casinhas", "Casinhas", "Juliana de Chaparral", "União", "https://jamildo.com/media/uploads/2025/prefeitos/juliana_de_chaparral_casinhas.jpg", "Raquel Lyra", "13.468", "JULIANA BARBOSA DA SILVA AGUIAR"],
+        ["catende", "Catende", "Dona Graça", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/dona_graca_catende.jpg", "Raquel Lyra", "33.086", "GRACINA MARIA RAMOS BRAZ DA SILVA"],
+        ["cedro", "Cedro", "Riva Bezerra", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/riva_bezerra_cedro.jpg", "Raquel Lyra", "10.843", "MARIA RIVA BEZERRA RODRIGUES"],
+        ["cha_de_alegria", "Chã de Alegria", "Marcos da Roça", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/marcos_da_roca_cha_de_alegria.jpg", "", "13.496", "MARCOS GOMES DO AMARAL"],
+        ["cha_grande", "Chã Grande", "Sandro Advogado", "Avante", "https://jamildo.com/media/uploads/2025/prefeitos/sandro_advogado_cha_grande.jpg", "", "21.258", "SANDRO CORREA DOS SANTOS"],
+        ["condado", "Condado", "Albino", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/albino_condado.jpg", "Raquel Lyra", "25.416", "SEVERINO ALBINO DA SILVA FILHO"],
+        ["correntes", "Correntes", "Edimilson da Bahia", "PT", "https://jamildo.com/media/uploads/2025/prefeitos/edimilson_da_bahia_correntes.jpg", "João Campos", "17.670", "EDIMILSON DA BAHIA DE LIMA GOMES"],
+        ["cortes", "Cortês", "Fátima Borba", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/fatima_borba_cortes.jpg", "Raquel Lyra", "10.426", "MARIA DE FATIMA CYSNEIROS SAMPAIO BORBA"],
+        ["cumaru", "Cumaru", "Zeneide Medeiros", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/zeneide_medeiros_cumaru.jpg", "João Campos", "16.215", "MARIA ZENEIDE MEDEIROS DA COST"],
+        ["cupira", "Cupira", "Eduardo Lira", "PSDB", "https://jamildo.com/media/uploads/2025/prefeitos/eduardo_lira_cupira.jpg", "João Campos", "24.343", "EDUARDO DA FONSECA LIRA"],
+        ["custodia", "Custódia", "Manoel Messias", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/manoel_messias_custodia.jpg", "Raquel Lyra", "39.609", "MANOEL MESSIAS DE SOUZA"],
+        ["dormentes", "Dormentes", "Corrinha de Geomarco", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/corrinha_de_geomarco_dormentes.jpg", "Raquel Lyra", "17.850", "MARIA DO SOCORRO COELHO DE SOUSA"],
+        ["escada", "Escada", "Mary Gouveia", "PL", "https://jamildo.com/media/uploads/2025/prefeitos/mary_gouveia_escada.jpg", "", "62.174", "MARIA JOSÉ FIDELIS MOURA GOUVEIA"],
+        ["exu", "Exu", "Junior Pinto", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/junior_pinto_exu.jpg", "Raquel Lyra", "33.486", "JOSÉ PINTO SARAIVA JÚNIOR"],
+        ["feira_nova", "Feira Nova", "Joel Gonzaga", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/joel_gonzaga_feira_nova.jpg", "", "22.222", "JOEL CANDIDO GONZAGA"],
+        ["ferreiros", "Ferreiros", "Zé Roberto", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/ze_roberto_ferreiros.jpg", "João Campos", "15.955", "JOSE ROBERTO DE OLIVEIRA"],
+        ["flores", "Flores", "Gilberto Ribeiro", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/gilberto_ribeiro_flores.jpg", "Raquel Lyra", "20.776", "CICERO GILBERTO CAVALCANTI RIBEIRO"],
+        ["floresta", "Floresta", "Forró Maniçoba", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/rorro_manicoba_floresta.jpg", "Raquel Lyra", "31.702", "ROSANGELA DE MOURA MANIÇOBA NOVAES FERRAZ"],
+        ["frei_miguelino", "Frei Miguelinho", "Lindonaldo da Farinha", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/lindonaldo_da_farinha_frei_miguelinho.jpg", "Raquel Lyra", "14.055", "JOSÉ LINDONALDO DE FRANÇA"],
+        ["gameleira", "Gameleira", "Dr Leandro", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/dr_leandro_gameleira.jpg", "Raquel Lyra", "17.583", "LEANDRO RIBEIRO GOMES DE LIMA"],
+        ["garanhuns", "Garanhuns", "Sivaldo Albino", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/sivaldo_albino_garanhuns.jpeg", "João Campos", "151.803", "SIVALDO RODRIGUES ALBINO"],
+        ["gloria_do_goita", "Glória do Goitá", "Jaminho", "PODE", "https://jamildo.com/media/uploads/2025/prefeitos/jaminho_gloria_do_goita.jpg", "Raquel Lyra", "30.420", "JAIME DE LIMA GOMES SOBRINHO"],
+        ["goiana", "Goiana", "Marcílio Régio", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/marcilio_regio_goiana.jpg", "João Campos", "85.497", "LUIZ EDUARDO SOUSA DOS SANTOS"],
+        ["granito", "Granito", "George de Sidney", "PT", "https://jamildo.com/media/uploads/2025/prefeitos/george_de_sidney_granito.jpg", "Raquel Lyra", "7.217", "GEORGE WASHINGTON PEREIRA ALENCAR"],
+        ["gravata", "Gravatá", "Padre Joselito", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/padre_joselito_gravata.jpg", "Raquel Lyra", "92.429", "JOSELITO GOMES DA SILVA"],
+        ["iati", "Iati", "Camila Souza", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/camila_souza_iati.jpg", "Raquel Lyra", "17.570", "CAMILA APARECIDA TENORIO SOUTO DE SOUZA"],
+        ["ibimirim", "Ibimirim", "Welliton Siqueira", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/welliton_siqueira_ibimirim.jpg", "Raquel Lyra", "28.825", "JOSÉ WELLITON DE MELO SIQUEIRA"],
+        ["ibirajuba", "Ibirajuba", "Izalta", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/izalta_ibirajuba.jpg", "Raquel Lyra", "7.334", "MARIA IZALTA SILVA LOPES GAMA"],
+        ["igarassu", "Igarassu", "Professora Elcione", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/professora_elcione_igarassu.jpeg", "Raquel Lyra", "123.017", "ELCIONE DA SILVA RAMOS PEDROZA BARBOSA"],
+        ["iguaracy", "Iguaracy", "Dr Pedro Alves", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/dr_pedro_alves_iguaracy.jpg", "Raquel Lyra", "11.347", "PEDRO ALVES DE OLIVEIRA NETO"],
+        ["ilha_de_itamaraca", "Ilha de Itamaracá", "Paulo Galvão", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/paulo_galvao_ilha_de_itamaraca.jpg", "Raquel Lyra", "25.658", "PAULO FERNANDO PIMENTEL GALVÃO"],
+        ["inaja", "Inajá", "Marcelo de Alberto", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/marcelo_de_alberto_inaja.jpg", "Raquel Lyra", "27.758", "MARCELO MACHADO FREIRE"],
+        ["ingazeira", "Ingazeira", "Luciano Torre", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/luciano_torre_ingazeira.png", "João Campos", "4.975", "LUCIANO TORRES MARTINS"],
+        ["ipojuca", "Ipojuca", "Carlos Santana", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/carlos_santana_ipojuca.jpg", "", "106.539", "CARLOS JOSE DE SANTANA"],
+        ["ipubi", "Ipubi", "João Marcos Siqueira", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/joao_marcos_siqueira_ipubi.jpg", "João Campos", "30.720", "JOÃO MARCOS SIQUEIRA TORRES"],
+        ["itacuruba", "Itacuruba", "Juninho Cantarelli", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/juninho_cantarelli_itacuruba.jpg", "João Campos", "4.491", "OLEGARIO JUNIOR CANTARELLI"],
+        ["itaiba", "Itaíba", "Pedro Pilota", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/pedro_pilota_itaiba.jpg", "Raquel Lyra", "33.995", "PEDRO TEOTONIO DA SILVA NETO"],
+        ["itambe", "Itambé", "Armando Pimentel", "PV", "https://jamildo.com/media/uploads/2025/prefeitos/armando_pimentel_itambe.jpg", "Raquel Lyra", "36.652", "ARMANDO PIMENTEL DA ROCHA"],
+        ["itapetim", "Itapetim", "Aline Karina", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/aline_itapetim.jpg", "João Campos", "14.236", "ALINE KARINA ALVES DA COSTA"],
+        ["itapissuma", "Itapissuma", "Júnior de Irmã Teca", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/junior_de_irma_teca_itapissuma.jpg", "Raquel Lyra", "29.669", "VALDEMIR LOURENCO DOS SANTOS JUNIOR"],
+        ["itaquitinga", "Itaquitinga", "Patrick Moraes", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/patrick_moraes_itaquitinga.jpg", "", "17.142", "PATRICK JOSE DE OLIVEIRA MORAES"],
+        ["jaboatao_dos_guararapes", "Jaboatão dos Guararapes", "Mano Medeiros", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/mano_medeiros_jaboatao_dos_guararapes.jpg", "Raquel Lyra", "684.293", "LUIZ JOSÉ INOJOSA DE MEDEIROS"],
+        ["jaqueira", "Jaqueira", "Ridete Pellegrino", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/ridete_pellegrino_jaqueira.jpg", "Raquel Lyra", "10.440", "RIDETE CELLIBE PELLEGRINO DE MACEDO OLIVEIRA"],
+        ["jatauba", "Jataúba", "Dra Cátia", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/dra_catia_jatauba.jpeg", "", "16.328", "CATIA JUNSARA RODRIGUES AQUILINO"],
+        ["jatoba", "Jatobá", "Rogério Ferreira", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/rogerio_ferreira_jatoba.jpg", "Raquel Lyra", "14.477", "ROGÉRIO FERREIRA GOMES DA SILVA"],
+        ["joao_alfredo", "João Alfredo", "Zé Martins", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/ze_martins_joao_alfredo.png", "Raquel Lyra", "28.842", "JOSÉ ANTONIO MARTINS DA SILVA"],
+        ["joaquim_nabuco", "Joaquim Nabuco", "Márcia Barreto", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/marcia_barreto_joaquim_nabuco.jpg", "Raquel Lyra", "13.416", "MARCIA ROBERTA BARRETO"],
+        ["jucati", "Jucati", "Clelson Peixoto", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/clelson_peixoto_jucati.jpg", "Raquel Lyra", "12.023", "CLELSON LUIS APARECIDO DE MELO"],
+        ["jupi", "Jupi", "Rivanda", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/rivanda_jupi.jpg", "João Campos", "16.022", "RIVANDA MARIA FREIRE LIMA TEIXEIRA"],
+        ["jurema", "Jurema", "Branco de Geraldo", "PT", "https://jamildo.com/media/uploads/2025/prefeitos/branco_de_geraldo_jurema.jpg", "", "14.002", "EDVALDO MARCOS RAMOS FERREIRA"],
+        ["lagoa_de_itaenga", "Lagoa de Itaenga", "Dimas Natanael", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/dimas-natanael-lagoa-de-itaenga.jpg", "Raquel Lyra", "19.863", "DIMAS CAETANO DE SOUSA"],
+        ["lagoa_do_carro", "Lagoa do Carro", "Zé Luiz", "PODE", "https://jamildo.com/media/uploads/2025/prefeitos/ze_luiz_lagoa_do_carro.jpg", "", "18.804", "JOSE LUIZ ALVES DE AMORIM"],
+        ["lagoa_do_ouro", "Lagoa do Ouro", "Edson Quebra", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/edson_quebra_lagoa_do_ouro.jpg", "", "12.367", "EDSON LOPES CAVALCANTE"],
+        ["lagoa_dos_gatos", "Lagoa dos Gatos", "Stênio", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/stenio_lagoa_dos_gatos.jpg", "", "14.333", "STÊNIO FERNANDES DE ALBUQUERQUE"],
+        ["lagoa_grande", "Lagoa Grande", "Catharina Garziera", "MDB", "https://jamildo.com/media/uploads/2025/prefeitos/catharina_garziera_lagoa_grande.jpg", "Raquel Lyra", "24.951", "ANA CATHARINA GARZIERA MORENO"],
+        ["lajedo", "Lajedo", "Erivaldo Chagas", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/erivaldo_chagas_lajedo.jpg", "João Campos", "41.960", "ERIVALDO RODRIGUES AMORIM"],
+        ["limoeiro", "Limoeiro", "Orlando Jorge", "PODE", "https://jamildo.com/media/uploads/2025/prefeitos/orlando_jorge_limoeiro.jpg", "Raquel Lyra", "59.236", "ORLANDO JORGE PEREIRA DE ANDRADE LIMA"],
+        ["macaparana", "Macaparana", "Paquinha", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/paquinha_macaparana.jpg", "Raquel Lyra", "24.642", "PAULO BARBOSA DA SILVA"],
+        ["machados", "Machados", "Juarez da Banana", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/juarez_da_banana_machados.jpg", "Raquel Lyra", "11.387", "JUAREZ RODRIGUES FERNANDES"],
+        ["manari", "Manari", "Junior do Audalio", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/junior_do_audalio_manari.jpg", "", "27.046", "AUDALIO MARTINS DA SILVA JUNIOR"],
+        ["maraial", "Maraial", "Marlos Henrique", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/marlos_henrique_maraial.jpg", "Raquel Lyra", "9.322", "MARLOS HENRIQUE CAVALCANTI"],
+        ["mirandiba", "Mirandiba", "Dr Evaldo", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/dr_evaldo_mirandiba.jpg", "Raquel Lyra", "14.605", "EVALDO BEZERRA DE CARVALHO"],
+        ["moreilandia", "Moreilândia", "Teto Texeira", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/teto_texeira_moreilandia.jpg", "Raquel Lyra", "10.839", "VICENTE TEIXEIRA SAMPAIO NETO"],
+        ["moreno", "Moreno", "Edmilson Cupertino", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/edmilson_cupertino_moreno.jpg", "Raquel Lyra", "57.654", "EDMILSON CUPERTINO DE ALMEIDA"],
+        ["nazare_da_mata", "Nazaré da Mata", "Aninha da Ferbom", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/aninha_da_ferbom_nazare_da_mata.jpg", "Raquel Lyra", "32.187", "ADRIANA ANDRADE LIMA VASCONCELOS COUTINHO"],
+        ["olinda", "Olinda", "Mirella Almeida", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/mirella_almeida_olinda.jpg", "Raquel Lyra", "364.717", "MIRELLA FERNANDA BEZERRA DE ALMEIDA"],
+        ["orobo", "Orobó", "Biu Abreu", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/biu_abreu_orobo.jpg", "Raquel Lyra", "22.412", "SEVERINO LUIZ PEREIRA DE ABREU"],
+        ["oroco", "Orocó", "Ismael Lira", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/ismael_lira_oroco.jpg", "Raquel Lyra", "14.129", "ISMAEL FERNANDES BIONE LIRA"],
+        ["ouricuri", "Ouricuri", "Victor Coelho", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/victor_coelho_ouricuri.jpeg", "Raquel Lyra", "68.489", "FRANCISCO VICTOR RAMOS COELHO"],
+        ["palmares", "Palmares", "Junior de Beto", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/junior_de_beto_palmares.jpg", "Raquel Lyra", "56.475", "JOSÉ BARTOLOMEU DE ALMEIDA MELO JUNIOR"],
+        ["palmeirina", "Palmeirina", "Delegada Thatianne", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/delegada_thatianne_palmeirina.jpg", "", "7.104", "THATIANNE PINTO MACEDO LIMA"],
+        ["panelas", "Panelas", "Ruben", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/ruben_panelas.jpg", "João Campos", "23.337", "RUBEN DE LIMA BARBOSA"],
+        ["paranatama", "Paranatama", "Dr Henrique Gois", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/dr_henrique_gois_paranatama.jpg", "", "12.778", "HENRIQUE DE OLIVEIRA GOIS"],
+        ["parnamirim", "Parnamirim", "Múcio Angelim", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/mucio-argelim-parnamirim.jpg", "Raquel Lyra", "18.960", "LUCELIO MUCIO MOURA ANGELIM"],
+        ["passira", "Passira", "Silvestre", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/silvestre_passira.jpg", "", "29.744", "SEVERINO SILVESTRE DE ALBUQUERQUE"],
+        ["paudalho", "Paudalho", "Paulinha da Educação", "PODE", "https://jamildo.com/media/uploads/2025/prefeitos/paulinha_da_educacao_paudalho.jpg", "Raquel Lyra", "59.924", "PAULA FRASSINETTE WANDERLEY MARINHO"],
+        ["paulista", "Paulista", "Severino Ramos", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/severino_ramos_paulista.jpg", "Raquel Lyra", "365.144", "SEVERINO RAMOS DE SANTANA"],
+        ["pedra", "Pedra", "Júnior Vaz", "PV", "https://jamildo.com/media/uploads/2025/prefeitos/junior_vaz_pedra.jpg", "João Campos", "23.671", "GILBERTO JUNIOR WANDERLEY VAZ"],
+        ["pesqueira", "Pesqueira", "Cacique Marcos", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/cacique_marcos_pesqueira.jpg", "Raquel Lyra", "65.481", "MARCOS LUIDSON DE ARAÚJO"],
+        ["petrolandia", "Petrolândia", "Fabiano Marcos", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/fabiano_marcos_petrolandia.jpg", "João Campos", "36.104", "FABIANO JAQUES MARQUES"],
+        ["petrolina", "Petrolina", "Simão Durando", "União", "https://jamildo.com/media/uploads/2025/prefeitos/simao_durano_petrolina.jpg", "Raquel Lyra", "418.444", "SIMÃO AMORIM DURANDO FILHO"],
+        ["pocao", "Poção", "Guilherme Vasconcelos", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/guilherme_vasconcelos_pocao.jpg", "Raquel Lyra", "10.792", "JOAO GUILHERME VASCONCELOS DE SOUSA"],
+        ["pombos", "Pombos", "Elias Meu Fii", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/elias_meu_fii_pombos.jpg", "Raquel Lyra", "26.942", "ELIAS BATISTA DE LIMA"],
+        ["primavera", "Primavera", "Jeyson Falcão", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/jeyson_falcao_primavera.jpg", "João Campos", "14.380", "JEYSON CAVALCANTI DE ALMEIDA FALCÃO"],
+        ["quipapa", "Quipapá", "Pité", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/pite_quipapa.jpg", "", "17.731", "GENIVALDO TEMOTEO BEZERRA"],
+        ["quixaba", "Quixaba", "Zé Pretinho", "Avante", "https://jamildo.com/media/uploads/2025/prefeitos/ze_pretinho_quixaba.jpg", "Raquel Lyra", "6.753", "JOSE PEREIRA NUNES"],
+        ["recife", "Recife", "Victor Marques", "PC do B", "https://jamildo.com/media/uploads/2025/prefeitos/victormarques_300x300.jpg", "João Campos", "1.588.376", "Victor Marques Alves"],
+        ["riacho_das_almas", "Riacho das Almas", "Dió Filho", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/dio_filho_riacho_das_almas.jpg", "Raquel Lyra", "21.490", "DIOCLECIO ROSENDO DE LIMA FILHO"],
+        ["ribeirao", "Ribeirão", "Carol Jordão", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/carol_jordao_ribeirao.jpg", "João Campos", "33.843", "ANA CAROLINA COELHO JORDÃO"],
+        ["rio_formoso", "Rio Formoso", "Berg de Hacker", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/berg_de_hacker_rio_formoso.jpg", "Raquel Lyra", "20.388", "GUTEMBERG ALEXANDRE RODRIGUES DA SILVA"],
+        ["saire", "Sairé", "Gildo Dias", "PT", "https://jamildo.com/media/uploads/2025/prefeitos/gildo_dias_saire.jpg", "Raquel Lyra", "11.213", "GILDO PONTES DE ARRUDA"],
+        ["salgadinho", "Salgadinho", "Joia", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/joia_salgadinho.jpg", "Raquel Lyra", "5.478", "JEOSADAQUE BARBOSA SALGADO"],
+        ["salgueiro", "Salgueiro", "Fabinho", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/fabinho_salgueiro.jpg", "Raquel Lyra", "65.946", "FÁBIO LISANDRO DE LIMA BARROS"],
+        ["saloa", "Saloá", "Junior De Rivaldo", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/junior_de_rivaldo_saloa.jpeg", "Raquel Lyra", "14.125", "RIVALDO ALVES DE SOUZA JUNIOR"],
+        ["sanharo", "Sanharó", "César Freitas", "PC do B", "https://jamildo.com/media/uploads/2025/prefeitos/cesar_freitas_sanharo.jpg", "João Campos", "18.812", "CÉSAR AUGUSTO DE FREITAS"],
+        ["santa_cruz", "Santa Cruz", "Cachoeira", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/cachoeira_santa_cruz.jpg", "João Campos", "14.342", "ADEGILDO GUIMARAES SOARES"],
+        ["santa_cruz_da_baixa_verde", "Santa Cruz da Baixa Verde", "Dr. Ismael", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/dr._ismael_santa_cruz_da_baixa_verde.jpg", "Raquel Lyra", "11.934", "ISMAEL QUINTINO LEITE DE SOUSA"],
+        ["santa_cruz_do_capibaribe", "Santa Cruz do Capibaribe", "Helinho Aragão", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/helinho_aragao_santa_cruz_do_capibaribe.jpg", "Raquel Lyra", "104.854", "HELIO LIMA ARAGAO FILHO"],
+        ["santa_filomena", "Santa Filomena", "Gildevan", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/gildevan_santa_filomena.jpg", "", "12.360", "PEDRO GILDEVAN COELHO MELO"],
+        ["santa_maria_da_boa_vista", "Santa Maria da Boa Vista", "George Duarte", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/george_duarte_santa_maria_da_boa_vista.jpg", "", "42.782", "GEORGE RODRIGUES DUARTE"],
+        ["santa_maria_do_cambuca", "Santa Maria do Cambucá", "Robevan", "PV", "https://jamildo.com/media/uploads/2025/prefeitos/robevan_santa_maria_do_cambuca.jpg", "João Campos", "14.586", "ALEX ROBEVAN DE LIMA"],
+        ["santa_terezinha", "Santa Terezinha", "Delson Lustosa", "PODE", "https://jamildo.com/media/uploads/2025/prefeitos/delson_lustosa_santa_terezinha.jpg", "", "10.487", "ADEILSON LUSTOSA DA SILVA"],
+        ["sao_benedito_do_sul", "São Benedito do Sul", "Zé Baiano", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/ze_baiano_sao_benedito_do_sul.jpg", "Raquel Lyra", "13.456", "JOSÉ RINALDO DE FIGUEREDO LOPES"],
+        ["sao_bento_do_una", "São Bento do Una", "Alexandre Batité", "MDB", "https://jamildo.com/media/uploads/2025/prefeitos/alexandre_batite_sao_bento_do_una.jpg", "João Campos", "51.165", "PEDRO ALEXANDRE MEDEIROS DE SOUZA"],
+        ["sao_caitano", "São Caetano", "Josafa Almeida", "PRD", "https://jamildo.com/media/uploads/2025/06/josafa-almeida-sao-caetano_DRaXTlf.png", "João Campos", "39.243", "JOSAFA ALMEIDA LIMA"],
+        ["sao_joao", "São João", "Wilson Lima", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/wilson_lima_sao_joao.jpg", "Raquel Lyra", "24.895", "JOSE WILSON FERREIRA DE LIMAF"],
+        ["sao_joaquim_do_monte", "São Joaquim do Monte", "Duguinha", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/duguinha-sao-jose-do-monte.jpeg", "Raquel Lyra", "20.438", "EDUARDO JOSÉ DE OLIVEIRA LINS"],
+        ["sao_jose_da_coroa_grande", "São José da Coroa Grande", "Barbosa", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/barbosa_sao_jose_da_coroa_grande.jpg", "Raquel Lyra", "19.511", "JOSE BARBOSA DE ANDRADE"],
+        ["sao_jose_do_belmonte", "São José do Belmonte", "Vinicius Marques", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/vinicius_marques_sao_jose_do_belmonte.jpg", "João Campos", "36.890", "VINICIUS MARQUES ALVES"],
+        ["sao_jose_do_egito", "São José do Egito", "Fredson Brito", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/fredson_brito_sao_jose_do_egito.jpg", "Raquel Lyra", "32.508", "FREDSON HENRIQUE DE OLIVEIRA BRITO"],
+        ["sao_lourenco_da_mata", "São Lourenço da Mata", "Vinicius Labanca", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/vinicius-labanca-sao-lourenco-da-mata.jpg", "João Campos", "118.258", "VINICIUS LABANCA"],
+        ["sao_vicente_ferrer", "São Vicente Férrer", "Marcone", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/marcone_sao_vicente_ferrer.jpg", "Raquel Lyra", "17.177", "MARCONE VICENTE DOS SANTOS"],
+        ["serra_talhada", "Serra Talhada", "Márcia Conrado", "PT", "https://jamildo.com/media/uploads/2025/prefeitos/marcia_conrado_serra_talhada.jpeg", "João Campos", "98.816", "MARCIA CONRADO DE LORENA E SA ARAUJO"],
+        ["serrita", "Serrita", "Aleudo Benedito", "MDB", "https://jamildo.com/media/uploads/2025/prefeitos/aleudo_benedito_serrita.jpg", "", "18.764", "SEBASTIÃO BENEDITO DOS SANTOS"],
+        ["sertania", "Sertânia", "Pollyanna Abreu", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/pollyanna_abreu_sertania.jpg", "Raquel Lyra", "34.271", "POLLYANNA BARBOSA DE ABREU"],
+        ["sirinhaem", "Sirinhaém", "Manoel da Retifica", "PODE", "https://jamildo.com/media/uploads/2025/prefeitos/manoel_da_retifica_sirinhaem.jpg", "", "39.171", "MANOEL SOARES DE SOUZA FILHO"],
+        ["solidao", "Solidão", "Mayco da Farmácia", "PSB", "https://jamildo.com/media/uploads/2025/prefeitos/mayco-da-farmacia-solidao.jpg", "João Campos", "5.386", "MAYCO PABLO SANTOS ARAUJO"],
+        ["surubim", "Surubim", "Chaparral", "União", "https://jamildo.com/media/uploads/2025/prefeitos/chaparral_surubim.jpg", "Raquel Lyra", "67.821", "CLEBER JOSÉ DE AGUIAR DA SILVA"],
+        ["tabira", "Tabira", "Flávio Marques", "PT", "https://jamildo.com/media/uploads/2025/prefeitos/flavio_marques_tabira.jpg", "Raquel Lyra", "29.180", "FLÁVIO FERREIRA MARQUES"],
+        ["tacaimbo", "Tacaimbó", "Joelda Pereira", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/joelda_pereira_tacaimbo.jpg", "Raquel Lyra", "14.330", "JOELDA LIMA DA SILVA PEREIRA"],
+        ["tacaratu", "Tacaratu", "Whashington", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/whashington_tacaratu.jpg", "Raquel Lyra", "24.898", "WASHINGTON ANGELO DE ARAÚJO"],
+        ["tamandare", "Tamandaré", "Carrapicho", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/carrapicho_tamandare.jpg", "João Campos", "24.670", "ISAIAS HONORATO DA SILVA MARQUES"],
+        ["taquaritinga_do_norte", "Taquaritinga do Norte", "Gena Lins", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/gena_lins_taquaritinga_do_norte.jpg", "Raquel Lyra", "25.511", "GENIVALDO FERREIRA LINS"],
+        ["terezinha", "Terezinha", "Arnobio Gomes", "Republicanos", "https://jamildo.com/media/uploads/2025/prefeitos/arnobio_gomes_terezinha.jpg", "", "6.853", "ARNOBIO GOMES DA SILVA"],
+        ["terra_nova", "Terra Nova", "Dinha Mororó", "Avante", "https://jamildo.com/media/uploads/2025/prefeitos/dinha_mororo_terra_nova.jpg", "Raquel Lyra", "9.231", "ESDRAS ENILDO PIRES DE CARVALHO COELHO"],
+        ["timbauba", "Timbaúba", "Marinaldo Rosendo", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/ivanildinho_timbauba.jpg", "João Campos", "47.312", "MARINALDO ROSENDO DE ALBUQUERQUE"],
+        ["toritama", "Toritama", "Sergio Colin", "MDB", "https://jamildo.com/media/uploads/2025/prefeitos/sergio_colin_toritama.jpg", "Raquel Lyra", "43.921", "SERGIO PROCOPIO DA SILVA CARVALHO"],
+        ["tracunhaem", "Tracunhaém", "Irmão Aluizio", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/irmao_aluizio_tracunhaem.jpg", "", "14.439", "ALUIZIO XAVIER DA SILVA"],
+        ["trindade", "Trindade", "Helbinha de Rodrigues", "União", "https://jamildo.com/media/uploads/2025/prefeitos/helbinha_de_rodrigues_trindade.jpg", "Raquel Lyra", "32.257", "HELBE DA SILVA RODRIGUES NASCIMENTO"],
+        ["triunfo", "Triunfo", "Luciano Bonfim", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/luciano_bonfim_triunfo.jpg", "Raquel Lyra", "15.141", "LUCIANO FERNANDO DE SOUSA"],
+        ["tupanatinga", "Tupanatinga", "Professor Ronaldo", "PP", "https://jamildo.com/media/uploads/2025/prefeitos/professor-ronaldo-tupanatinga.jpg", "Raquel Lyra", "28.141", "JOSÉ RONALDO DA SILVA"],
+        ["tuparetama", "Tuparetama", "Diógenes Patriota", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/diogenes_patriota_tuparetama.jpg", "Raquel Lyra", "8.261", "DIOGENES TORRES DA COSTA PATRIOTA"],
+        ["venturosa", "Venturosa", "Kelvin Cavalcanti", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/kelvin-cavalcanti-venturosa.jpeg", "", "17.563", "KELVIN DOUGLAS CAVALCANTI ALMEIDA"],
+        ["verdejante", "Verdejante", "Xicão Tavares", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/xicao_tavares_verdejante.jpg", "Raquel Lyra", "9.483", "FRANCISCO DE ASSIS TAVARES FILHO"],
+        ["vertente_do_lerio", "Vertente do Lério", "Dr Histênio", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/dr_histeenio_vertente_do_lerio.jpg", "Raquel Lyra", "7.776", "HISTÊNIO JÚNIOR DA SILVA SALES"],
+        ["vertentes", "Vertentes", "Rael", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/rael_vertentes.jpg", "Raquel Lyra", "23.127", "ISRAEL FERREIRA DE ANDRADE"],
+        ["vicencia", "Vicência", "Eder", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/eder_vicencia.jpg", "Raquel Lyra", "27.151", "EDER WALTTER JOSÉ DE OLIVEIRA SILVA"],
+        ["vitoria_de_santo_antao", "Vitória de Santo Antão", "Paulo Roberto", "MDB", "https://jamildo.com/media/uploads/2025/prefeitos/paulo_roberto_vitoria_de_santo_antao.jpg", "João Campos", "144.243", "PAULO ROBERTO LEITE DE ARRUDA"],
+        ["xexeu", "Xexéu", "Thiago de Miel", "PSD", "https://jamildo.com/media/uploads/2025/prefeitos/thiago_de_miel_xexeu.jpg", "Raquel Lyra", "11.699", "THIAGO GONÇALVES DE LIMA"]
+    ];
+
+    const mayors = rawData.map(item => ({
+        id: item[0],
+        city: item[1],
+        popularName: item[2],
+        party: item[3],
+        photo: item[4],
+        support: item[5],
+        pop: item[6],
+        fullName: item[7],
+        region: regionMap[item[0]] || "Não informada"
+    }));
+
+    const mayorGrid = document.getElementById('mayorGrid');
+    const searchInput = document.getElementById('searchInput');
+    const regionFilter = document.getElementById('regionFilter');
+    const partyFilter = document.getElementById('partyFilter');
+    const statsSummary = document.getElementById('statsSummary');
+    const noResults = document.getElementById('no-results');
+
+    function initParties() {
+        const parties = [...new Set(mayors.map(m => m.party))].sort();
+        parties.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p;
+            option.textContent = p;
+            partyFilter.appendChild(option);
+        });
+    }
+
+    function getRegionClass(region) {
+        const r = region.toLowerCase();
+        if (r.includes('rmr')) return 'region-rmr';
+        if (r.includes('sertão')) return 'region-sertao';
+        if (r.includes('agreste')) return 'region-agreste';
+        if (r.includes('norte')) return 'region-matanorte';
+        if (r.includes('sul')) return 'region-matasul';
+        return '';
+    }
+
+    function renderMayors(filteredMayors) {
+        mayorGrid.innerHTML = '';
+        
+        if (filteredMayors.length === 0) {
+            noResults.style.display = 'block';
+            statsSummary.textContent = 'Nenhum prefeito encontrado.';
+            return;
+        }
+
+        noResults.style.display = 'none';
+        statsSummary.textContent = `${filteredMayors.length} cidades localizadas`;
+
+        filteredMayors.forEach(m => {
+            const supportTag = m.support.includes('Raquel') ? 'tag-raquel' : 
+                             (m.support.includes('João') ? 'tag-joao' : '');
+            
+            const card = document.createElement('div');
+            card.className = `card ${getRegionClass(m.region)}`;
+            card.innerHTML = `
+                <div class="card-header">
+                    <img src="${m.photo}" alt="${m.popularName}" class="mayor-photo" onerror="this.src='https://via.placeholder.com/150?text=Sem+Foto'">
+                    <div class="mayor-info">
+                        <div class="popular-name">${m.popularName}</div>
+                        <div class="full-name-header">${m.fullName}</div>
+                        <div class="city-name">${m.city}</div>
+                        <span class="badge-party">${m.party}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="info-container">
+                        <div class="info-row">
+                            <span class="label">Região:</span>
+                            <span class="value">${m.region}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">População:</span>
+                            <span class="value">${m.pop}</span>
+                        </div>
+                        ${m.support ? `
+                        <div class="support-tag ${supportTag}">
+                            Apoio: ${m.support}
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            mayorGrid.appendChild(card);
+        });
+    }
+
+    function filterData() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedRegion = regionFilter.value;
+        const selectedParty = partyFilter.value;
+
+        const filtered = mayors.filter(m => {
+            const matchesSearch = m.city.toLowerCase().includes(searchTerm) || 
+                                m.popularName.toLowerCase().includes(searchTerm) ||
+                                m.fullName.toLowerCase().includes(searchTerm);
+            const matchesRegion = selectedRegion === "" || m.region === selectedRegion;
+            const matchesParty = selectedParty === "" || m.party === selectedParty;
+            
+            return matchesSearch && matchesRegion && matchesParty;
+        });
+
+        renderMayors(filtered);
+    }
+
+    searchInput.addEventListener('input', filterData);
+    regionFilter.addEventListener('change', filterData);
+    partyFilter.addEventListener('change', filterData);
+
+    initParties();
+    renderMayors(mayors);
+
+</script>
+
+</body>
+</html>
